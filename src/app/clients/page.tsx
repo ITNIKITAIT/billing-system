@@ -1,6 +1,6 @@
 import { getClients } from "@/lib/services/client.service";
-import { ClientsPageHeader } from "./_components/clients-page-header";
-import { ClientsTable } from "./_components/clients-table";
+import { ClientsPageHeader } from "../../components/clients/clients-page-header";
+import { ClientsTable } from "../../components/clients/clients-table";
 
 export default async function ClientsPage() {
   const clients = await getClients();

@@ -33,13 +33,15 @@ import {
   type ClientFormValues,
   type ClientFormDefaultValues,
   clientFormSchema,
-} from "../_schemas/client";
+} from "@/lib/schemas/client";
 import { Plan } from "@prisma/client";
 
 interface ClientFormProps {
   plans: Plan[];
   defaultValues?: ClientFormDefaultValues;
-  submitAction: (data: ClientFormValues) => Promise<any>;
+  submitAction: (
+    data: ClientFormValues
+  ) => Promise<{ success: boolean; error?: string }>;
   successRedirect: string;
   submitLabel?: string;
   title: string;
@@ -90,7 +92,7 @@ export function ClientForm({
         router.push(successRedirect);
         return;
       }
-      setServerError(result.error);
+      setServerError(result.error ?? null);
     } catch (err) {
       console.error("Client form submit error:", err);
       setServerError("Something went wrong. Please try again.");

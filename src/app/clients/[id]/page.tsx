@@ -1,9 +1,10 @@
 import { getPlans } from "@/lib/services/plan.service";
-import { updateClient } from "@/lib/services/client.service";
-import { ClientForm } from "../_components/client-form";
+import { updateClient, getClient } from "@/lib/services/client.service";
+import { getInvoicesByClient } from "@/lib/services/invoice.service";
+import { ClientForm } from "@/components/clients/client-form";
 import { BackButton } from "@/components/shared/back-button";
-import { getClient } from "@/lib/services/client.service";
 import { notFound } from "next/navigation";
+import { InvoicesBlock } from "@/components/invoices/invoices-block";
 
 export default async function ClientPage({
   params,
@@ -11,31 +12,41 @@ export default async function ClientPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const client = await getClient(id);
+  const [client, plans, invoices] = await Promise.all([
+    getClient(id),
+    getPlans(),
+    getInvoicesByClient(id),
+  ]);
   if (!client) {
     return notFound();
   }
-  const plans = await getPlans();
 
   return (
     <>
       <BackButton href="/clients" />
-      <ClientForm
-        plans={plans}
-        defaultValues={{
-          id: client.id,
-          name: client.name,
-          email: client.email,
-          planId: client.planId ?? undefined,
-          discount: client.discount,
-          isActive: client.isActive,
-        }}
-        submitAction={updateClient.bind(null, id)}
-        successRedirect="/clients"
-        submitLabel="Update client"
-        title="Update client"
-        description="Update an agency client and assign a plan."
-      />
+      <div className="space-y-6">
+        <InvoicesBlock
+          clientId={id}
+          invoices={invoices}
+          hasPlan={Boolean(client.planId)}
+        />
+        <ClientForm
+          plans={plans}
+          defaultValues={{
+            id: client.id,
+            name: client.name,
+            email: client.email,
+            planId: client.planId ?? undefined,
+            discount: client.discount,
+            isActive: client.isActive,
+          }}
+          submitAction={updateClient.bind(null, id)}
+          successRedirect={`/clients/${id}`}
+          submitLabel="Update client"
+          title="Update client"
+          description="Update an agency client and assign a plan."
+        />
+      </div>
     </>
   );
 }

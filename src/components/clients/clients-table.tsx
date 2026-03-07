@@ -18,6 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import type { getClients } from "@/lib/services/client.service";
+import { EyeIcon } from "lucide-react";
 
 type ClientWithPlan = Awaited<ReturnType<typeof getClients>>[number];
 
@@ -78,6 +79,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                         size: "sm",
                       })}
                     >
+                      <EyeIcon className="size-4" />
                       View
                     </Link>
                   </TableCell>

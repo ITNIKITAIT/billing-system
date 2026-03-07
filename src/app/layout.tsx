@@ -3,6 +3,7 @@ import "./globals.css";
 import { Raleway } from "next/font/google";
 import { cn } from "@/lib/utils";
 import NextTopLoader from "nextjs-toploader";
+import { Header } from "@/components/shared/header";
 
 const raleway = Raleway({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -21,7 +22,10 @@ export default function RootLayout({
       <body className="antialiased">
         <NextTopLoader color="#097969" height={3} showSpinner={false} />
         <main className="min-h-screen p-8">
-          <div className="mx-auto max-w-5xl space-y-6">{children}</div>
+          <div className="mx-auto max-w-5xl space-y-6">
+            <Header />
+            {children}
+          </div>
         </main>
       </body>
     </html>

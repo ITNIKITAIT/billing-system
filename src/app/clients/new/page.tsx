@@ -1,6 +1,6 @@
 import { getPlans } from "@/lib/services/plan.service";
 import { createClient } from "@/lib/services/client.service";
-import { ClientForm } from "../_components/client-form";
+import { ClientForm } from "../../../components/clients/client-form";
 import { BackButton } from "@/components/shared/back-button";
 
 export default async function NewClientPage() {

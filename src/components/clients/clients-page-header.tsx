@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { PlusIcon } from "lucide-react";
 
 export function ClientsPageHeader() {
   return (
@@ -12,6 +13,7 @@ export function ClientsPageHeader() {
         </p>
       </div>
       <Link href="/clients/new" className={buttonVariants()}>
+        <PlusIcon className="size-4" />
         Add client
       </Link>
     </div>

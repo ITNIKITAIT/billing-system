@@ -1,9 +1,6 @@
 "use server";
 
-import {
-  clientFormSchema,
-  ClientFormValues,
-} from "@/app/clients/_schemas/client";
+import { clientFormSchema, ClientFormValues } from "@/lib/schemas/client";
 import { prisma } from "../../../prisma/db";
 
 export const getClients = async () => {
