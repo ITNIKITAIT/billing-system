@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../../prisma/db";
+import { prisma } from "../../../../../prisma/db";
 
 export async function GET(
   _request: NextRequest,
@@ -67,17 +67,21 @@ export async function PATCH(
       data.email = email.trim().toLowerCase();
     }
     if (planId !== undefined) {
-      if (typeof planId !== "string" || !planId.trim()) {
-        return NextResponse.json(
-          { error: "planId must be a non-empty string" },
-          { status: 400 }
-        );
+      const planIdTrimmed = typeof planId === "string" ? planId.trim() : "";
+      if (planIdTrimmed) {
+        const plan = await prisma.plan.findUnique({
+          where: { id: planIdTrimmed },
+        });
+        if (!plan) {
+          return NextResponse.json(
+            { error: "Plan not found" },
+            { status: 404 }
+          );
+        }
+        data.planId = planIdTrimmed;
+      } else {
+        data.planId = undefined;
       }
-      const plan = await prisma.plan.findUnique({ where: { id: planId } });
-      if (!plan) {
-        return NextResponse.json({ error: "Plan not found" }, { status: 404 });
-      }
-      data.planId = planId;
     }
     if (discount !== undefined) {
       const discountNum = Number(discount);

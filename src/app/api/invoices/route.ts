@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../prisma/db";
-import { calculateFee } from "../../../src/lib/billing";
+import { prisma } from "../../../../prisma/db";
+import { calculateFee } from "@/lib/billing";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -65,6 +65,12 @@ export async function POST(request: NextRequest) {
     });
     if (!client) {
       return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    }
+    if (!client.plan) {
+      return NextResponse.json(
+        { error: "Client must have a plan to create an invoice" },
+        { status: 400 }
+      );
     }
 
     const fee = calculateFee(

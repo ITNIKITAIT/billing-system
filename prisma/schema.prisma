@@ -25,8 +25,8 @@ model Client {
   discount              Float     @default(0)
   isActive              Boolean   @default(true)
   subscriptionStartDate DateTime?
-  planId                String
-  plan                  Plan      @relation(fields: [planId], references: [id])
+  planId                String?
+  plan                  Plan?     @relation(fields: [planId], references: [id])
 
   invoices Invoice[]
 

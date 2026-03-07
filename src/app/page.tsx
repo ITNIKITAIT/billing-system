@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen p-8">
+    <>
       <h1 className="text-2xl font-semibold mb-4">Billing System</h1>
       <nav className="flex gap-4">
         <Link href="/dashboard" className="text-blue-600 hover:underline">
@@ -12,6 +12,6 @@ export default function HomePage() {
           Clients
         </Link>
       </nav>
-    </main>
+    </>
   );
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../../prisma/db";
+import { prisma } from "../../../../../prisma/db";
 import { InvoiceStatus } from "@prisma/client";
-import { calculateFee } from "../../../../src/lib/billing";
+import { calculateFee } from "@/lib/billing";
 
 const VALID_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
   DRAFT: ["SENT"],
@@ -103,6 +103,13 @@ export async function PATCH(
     if (Number.isNaN(adSpendNum) || adSpendNum < 0) {
       return NextResponse.json(
         { error: "adSpend must be a non-negative number" },
+        { status: 400 }
+      );
+    }
+
+    if (!invoice.client.plan) {
+      return NextResponse.json(
+        { error: "Client has no plan; cannot recalculate fee" },
         { status: 400 }
       );
     }

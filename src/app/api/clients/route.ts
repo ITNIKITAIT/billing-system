@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../prisma/db";
+import { prisma } from "../../../../prisma/db";
 
 export async function GET() {
   try {
     const clients = await prisma.client.findMany({
       include: { plan: true },
-      orderBy: { name: "asc" },
     });
     return NextResponse.json(clients);
   } catch (e) {
@@ -34,11 +33,14 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    if (typeof planId !== "string" || !planId.trim()) {
-      return NextResponse.json(
-        { error: "planId is required and must be a non-empty string" },
-        { status: 400 }
-      );
+    const planIdTrimmed = typeof planId === "string" ? planId.trim() : "";
+    if (planIdTrimmed) {
+      const plan = await prisma.plan.findUnique({
+        where: { id: planIdTrimmed },
+      });
+      if (!plan) {
+        return NextResponse.json({ error: "Plan not found" }, { status: 404 });
+      }
     }
 
     const discountNum = discount != null ? Number(discount) : 0;
@@ -63,16 +65,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const plan = await prisma.plan.findUnique({ where: { id: planId } });
-    if (!plan) {
-      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
-    }
-
     const client = await prisma.client.create({
       data: {
         name: name.trim(),
         email: email.trim().toLowerCase(),
-        planId,
+        planId: planIdTrimmed || null,
         discount: discountNum,
         subscriptionStartDate: startDate,
       },
