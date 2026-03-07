@@ -1,0 +1,22 @@
+---
+description: Database design — plans, clients, invoices; migrations and seed
+globs: **/prisma/**/*,**/lib/prisma*
+alwaysApply: false
+---
+
+# Database and Plans
+
+**Models (conceptual):**
+
+- **Plan:** name (e.g. Basic, Pro, Premium), fee rate (decimal), minimum fee. Three distinct tiers with different numbers.
+- **Client:** name, email, plan reference, discount (%), active flag. Admin manages these.
+- **Invoice:** client, ad spend, calculated fee, status (draft/sent/paid), month (billing period), timestamps.
+
+**Conventions:**
+
+- Use a single Prisma client instance (singleton from e.g. `/lib/prisma.js`) — do not instantiate `PrismaClient` in route handlers.
+- Apply schema changes via `prisma migrate dev`; do not change the DB manually.
+- Seed subscription plans once (e.g. in `prisma/seed.js`). App logic should read plan data from DB, not hardcode rates/minimums.
+- Use transactions when multiple related writes must succeed together.
+
+**Dashboard queries:** “Active clients” = clients that are considered active (e.g. `isActive` or by your schema). “This month” = invoices whose billing month is the current month. Aggregate total and average for that set.

@@ -1,0 +1,14 @@
+---
+description: Shared UI must use shadcn; implement in components/ui
+globs: components/**/*.tsx,**/*.tsx
+alwaysApply: false
+---
+
+# Shared UI & Reusable Components
+
+- **Always use shadcn/ui** for shared, reusable UI. Do not introduce other UI libraries or custom primitives for buttons, forms, dialogs, etc.
+- **Place shared components in `components/ui/`.** Any reusable UI built on shadcn (wrappers, composed components, layouts) lives there.
+- Use shadcn primitives from the project’s shadcn installation (e.g. `@/components/ui/*`). Compose them in `components/ui/` when you need project-specific reusable pieces.
+- Page-specific or one-off UI can stay next to the route/feature; only **shared** components go in `components/ui/`.
+
+**Summary:** shadcn only for shared UI; implement those in `components/ui/`.
