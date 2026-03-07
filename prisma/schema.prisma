@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Plan {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  feeRate Float
+  minFee  Float
+  clients Client[]
+}
+
+model Client {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  discount  Float     @default(0)
+  isActive  Boolean   @default(true)
+  planId    Int
+  plan      Plan      @relation(fields: [planId], references: [id])
+  invoices  Invoice[]
+  createdAt DateTime  @default(now())
+}
+
+model Invoice {
+  id        Int          @id @default(autoincrement())
+  clientId  Int
+  client    Client       @relation(fields: [clientId], references: [id])
+  adSpend   Float
+  fee       Float
+  status    InvoiceStatus @default(DRAFT)
+  month     DateTime
+  createdAt DateTime     @default(now())
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+}

@@ -7,7 +7,7 @@ alwaysApply: true
 
 **Purpose:** Small billing system for an advertising agency. Clients are charged a monthly fee based on ad spend, subscription plan, and optional discount.
 
-**Tech stack (required):** Next.js (App Router), JavaScript, Tailwind, Shadcn PostgreSQL, PrismaORM.
+**Tech stack (required):** Next.js (App Router), TypeScript, Tailwind, Shadcn PostgreSQL, PrismaORM.
 
 **Core features:**
 
