@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../prisma/db";
+import { getPlans } from "@/lib/services/plan.service";
 
 export async function GET() {
   try {
-    const plans = await prisma.plan.findMany({
-      orderBy: { name: "asc" },
-    });
+    const plans = await getPlans();
     return NextResponse.json(plans);
   } catch (e) {
     console.error("GET /api/plans", e);

@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../../prisma/db";
+import { createClient, getClients } from "@/lib/services/client.service";
 
 export async function GET() {
   try {
-    const clients = await prisma.client.findMany({
-      include: { plan: true },
-    });
+    const clients = await getClients();
     return NextResponse.json(clients);
   } catch (e) {
     console.error("GET /api/clients", e);
@@ -19,74 +17,12 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, planId, discount, subscriptionStartDate } = body;
-
-    if (typeof name !== "string" || !name.trim()) {
-      return NextResponse.json(
-        { error: "name is required and must be a non-empty string" },
-        { status: 400 }
-      );
+    const result = await createClient(body);
+    if (result.success) {
+      return NextResponse.json(result);
     }
-    if (typeof email !== "string" || !email.trim()) {
-      return NextResponse.json(
-        { error: "email is required and must be a non-empty string" },
-        { status: 400 }
-      );
-    }
-    const planIdTrimmed = typeof planId === "string" ? planId.trim() : "";
-    if (planIdTrimmed) {
-      const plan = await prisma.plan.findUnique({
-        where: { id: planIdTrimmed },
-      });
-      if (!plan) {
-        return NextResponse.json({ error: "Plan not found" }, { status: 404 });
-      }
-    }
-
-    const discountNum = discount != null ? Number(discount) : 0;
-    if (Number.isNaN(discountNum) || discountNum < 0 || discountNum > 100) {
-      return NextResponse.json(
-        { error: "discount must be a number between 0 and 100" },
-        { status: 400 }
-      );
-    }
-
-    const startDate =
-      subscriptionStartDate != null && subscriptionStartDate !== ""
-        ? new Date(subscriptionStartDate)
-        : null;
-    if (
-      startDate !== null &&
-      (Number.isNaN(startDate.getTime()) || startDate.getTime() < 0)
-    ) {
-      return NextResponse.json(
-        { error: "subscriptionStartDate must be a valid date or omitted" },
-        { status: 400 }
-      );
-    }
-
-    const client = await prisma.client.create({
-      data: {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        planId: planIdTrimmed || null,
-        discount: discountNum,
-        subscriptionStartDate: startDate,
-      },
-      include: { plan: true },
-    });
-    return NextResponse.json(client);
-  } catch (e: unknown) {
-    const message =
-      e && typeof e === "object" && "code" in e
-        ? (e as { code: string }).code
-        : null;
-    if (message === "P2002") {
-      return NextResponse.json(
-        { error: "A client with this email already exists" },
-        { status: 409 }
-      );
-    }
+    return NextResponse.json({ error: result.error }, { status: 400 });
+  } catch (e) {
     console.error("POST /api/clients", e);
     return NextResponse.json(
       { error: "Failed to create client" },
