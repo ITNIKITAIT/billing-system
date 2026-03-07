@@ -1,0 +1,23 @@
+---
+description: Billing fee calculation — plan rate, minimum, discount order
+globs: **/lib/**/*.js,**/billing*
+alwaysApply: false
+---
+
+# Billing Fee Logic
+
+All fee calculation must live in a dedicated module (e.g. `/lib/billing.js`). Keep it **pure** — no DB or side effects.
+
+**Order of operations:**
+
+1. Calculate: `adSpend × feeRate`
+2. Apply minimum: `fee = max(calculated, minFee)`
+3. Apply discount: `fee = fee × (1 - discountPercent / 100)`
+4. Round to 2 decimal places
+
+**Rules:**
+
+- Minimum fee is applied **before** the discount. Wrong: applying discount then comparing to minimum.
+- Discount always applies in full (no partial or conditional discount).
+- Return a single number (final fee); do not mutate plan or client data.
+- Use plan’s `feeRate` as decimal (e.g. 0.08 for 8%) and `minFee` in dollars; client `discount` as percentage (e.g. 10 for 10%).

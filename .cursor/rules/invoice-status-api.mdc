@@ -1,0 +1,26 @@
+---
+description: Invoice status transitions and server-side enforcement
+globs: **/api/**/*.js,**/app/api/**
+alwaysApply: false
+---
+
+# Invoice Status and API Enforcement
+
+**Status flow:** `DRAFT` → `SENT` → `PAID`. No backwards transitions.
+
+**Server-side rules (must enforce in API, not only in UI):**
+
+- Once status is **SENT:** invoice is read-only (fee, adSpend, etc. cannot be edited).
+- Once status is **PAID:** no status or data changes allowed (cannot revert to SENT or DRAFT).
+
+**Allowed transitions:**
+
+- `DRAFT` → `SENT` only
+- `SENT` → `PAID` only
+- `PAID` → (none)
+
+Reject any other transition with 403 (or 400) and a clear error. Validate current status from DB before applying the new status.
+
+**When generating an invoice:** Store the billing month (e.g. first day of month). Dashboard “this month” = invoices whose month is the current calendar month.
+
+**Validation:** Always validate input (adSpend, clientId, etc.) on the server. Return appropriate HTTP status codes and JSON error messages.

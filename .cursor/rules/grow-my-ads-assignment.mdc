@@ -1,0 +1,19 @@
+---
+description: Grow My Ads test assignment — project scope and tech stack
+alwaysApply: true
+---
+
+# Grow My Ads Billing System — Assignment Scope
+
+**Purpose:** Small billing system for an advertising agency. Clients are charged a monthly fee based on ad spend, subscription plan, and optional discount.
+
+**Tech stack (required):** Next.js (App Router), JavaScript, Tailwind, Shadcn PostgreSQL, PrismaORM.
+
+**Core features:**
+
+- **Plans:** Three tiers (e.g. Basic, Pro, Premium). Each has a fee rate (% of ad spend) and a minimum monthly fee. Fee = max(adSpend × rate, minFee).
+- **Discounts:** Client-level % off, applied **after** the minimum fee check. Always applied in full.
+- **Clients:** Admin adds/manages clients; assign plan and optional discount.
+- **Invoices:** Admin enters ad spend → system generates invoice (fee from plan + discount). Invoices have statuses: draft → sent → paid. **Sent = not editable. Paid = cannot revert.** Enforce on server.
+- **Invoice history:** List per client (amounts, dates, statuses).
+- **Dashboard:** Active clients count, total invoiced this month, average invoice amount.
