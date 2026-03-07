@@ -7,34 +7,51 @@ datasource db {
 }
 
 model Plan {
-  id      Int      @id @default(autoincrement())
-  name    String   @unique
+  id      String @id @default(uuid())
+  name    String @unique
   feeRate Float
   minFee  Float
+
   clients Client[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Client {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  discount  Float     @default(0)
-  isActive  Boolean   @default(true)
-  planId    Int
-  plan      Plan      @relation(fields: [planId], references: [id])
-  invoices  Invoice[]
-  createdAt DateTime  @default(now())
+  id                    String    @id @default(uuid())
+  name                  String
+  email                 String    @unique
+  discount              Float     @default(0)
+  isActive              Boolean   @default(true)
+  subscriptionStartDate DateTime?
+  planId                String
+  plan                  Plan      @relation(fields: [planId], references: [id])
+
+  invoices Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Invoice {
-  id        Int          @id @default(autoincrement())
-  clientId  Int
-  client    Client       @relation(fields: [clientId], references: [id])
-  adSpend   Float
-  fee       Float
-  status    InvoiceStatus @default(DRAFT)
-  month     DateTime
-  createdAt DateTime     @default(now())
+  id       String @id @default(uuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+
+  year  Int
+  month Int
+
+  adSpend Float
+  fee     Float
+
+  status InvoiceStatus @default(DRAFT)
+
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([clientId, month, year])
 }
 
 enum InvoiceStatus {
