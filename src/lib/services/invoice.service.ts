@@ -2,7 +2,7 @@
 
 import { InvoiceStatus } from "@prisma/client";
 import { prisma } from "../../../prisma/db";
-import { calculateFee } from "@/lib/billing";
+import { calculateFee, getProrationRatio } from "@/lib/billing";
 import {
   generateInvoiceFormSchema,
   type GenerateInvoiceFormValues,
@@ -55,11 +55,17 @@ export async function createInvoice(
     return { success: false, error: "Invoice already exists" };
   }
 
+  const prorationRatio = getProrationRatio(
+    client.subscriptionStartDate,
+    year,
+    month
+  );
   const fee = calculateFee(
     adSpend,
     client.plan.feeRate,
     client.plan.minFee,
-    client.discount
+    client.discount,
+    prorationRatio
   );
 
   try {
@@ -139,11 +145,17 @@ export async function updateInvoiceAdSpend(id: string, adSpend: number) {
     };
   }
 
+  const prorationRatio = getProrationRatio(
+    invoice.client.subscriptionStartDate,
+    invoice.year,
+    invoice.month
+  );
   const fee = calculateFee(
     adSpend,
     invoice.client.plan.feeRate,
     invoice.client.plan.minFee,
-    invoice.client.discount
+    invoice.client.discount,
+    prorationRatio
   );
 
   try {
