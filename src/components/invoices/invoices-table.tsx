@@ -11,12 +11,7 @@ import {
 import { InvoiceRow } from "./invoice-row";
 import type { InvoiceForRow } from "./invoice-row";
 import type { ActionResult } from "@/lib/api";
-
-enum InvoiceStatus {
-  DRAFT = "DRAFT",
-  SENT = "SENT",
-  PAID = "PAID",
-}
+import { InvoiceStatus } from "@prisma/client";
 
 interface InvoicesTableProps {
   invoices: InvoiceForRow[];

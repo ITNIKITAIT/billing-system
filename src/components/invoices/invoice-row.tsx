@@ -12,13 +12,7 @@ import {
 } from "@/lib/format";
 import { EditIcon, Loader2Icon, Trash2Icon } from "lucide-react";
 import type { ActionResult } from "@/lib/api";
-import type { InvoiceStatus as PrismaInvoiceStatus } from "@prisma/client";
-
-enum InvoiceStatus {
-  DRAFT = "DRAFT",
-  SENT = "SENT",
-  PAID = "PAID",
-}
+import { InvoiceStatus } from "@prisma/client";
 
 export interface InvoiceForRow {
   id: string;
@@ -26,7 +20,7 @@ export interface InvoiceForRow {
   year: number;
   adSpend: number;
   fee: number;
-  status: PrismaInvoiceStatus;
+  status: InvoiceStatus;
 }
 
 interface InvoiceRowProps {
