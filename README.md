@@ -78,7 +78,7 @@ Example: Basic (8%, $200 min), ad spend $1,000, 50% discount → $80 calculated 
 
 ---
 
-**Walkthrough video:** [Loom video — add link here]
+**Walkthrough video:** https://www.loom.com/share/bc0910e48df94991af1d7f373b0a5b8a
 
 ## Run locally
 
