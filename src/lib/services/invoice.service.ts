@@ -121,6 +121,36 @@ export async function updateInvoiceStatus(id: string, status: InvoiceStatus) {
   }
 }
 
+const DELETABLE_STATUSES: InvoiceStatus[] = [
+  InvoiceStatus.DRAFT,
+  InvoiceStatus.SENT,
+];
+
+export async function deleteInvoice(id: string) {
+  const invoice = await prisma.invoice.findUnique({
+    where: { id },
+  });
+  if (!invoice) {
+    return { success: false, error: "Invoice not found" };
+  }
+  if (!DELETABLE_STATUSES.includes(invoice.status)) {
+    return {
+      success: false,
+      error: "Only draft or sent invoices can be deleted",
+    };
+  }
+
+  try {
+    await prisma.invoice.delete({
+      where: { id },
+    });
+    return { success: true };
+  } catch (e) {
+    console.error("deleteInvoice", e);
+    return { success: false, error: "Failed to delete invoice" };
+  }
+}
+
 export async function updateInvoiceAdSpend(id: string, adSpend: number) {
   const invoice = await prisma.invoice.findUnique({
     where: { id },

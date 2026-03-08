@@ -30,6 +30,7 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
           <TableHead className="text-right">Ad spend</TableHead>
           <TableHead className="text-right">Fee</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

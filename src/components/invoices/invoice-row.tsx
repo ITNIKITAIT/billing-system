@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   updateInvoiceAdSpend,
   updateInvoiceStatus,
+  deleteInvoice,
 } from "@/lib/services/invoice.service";
 import { Invoice, InvoiceStatus } from "@prisma/client";
 import {
@@ -15,7 +16,7 @@ import {
   formatInvoicePeriod,
   statusBadgeVariant,
 } from "@/lib/format";
-import { EditIcon } from "lucide-react";
+import { EditIcon, Trash2Icon } from "lucide-react";
 
 interface InvoiceRowProps {
   invoice: Invoice;
@@ -27,11 +28,15 @@ export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
   const [adSpendInput, setAdSpendInput] = useState(String(invoice.adSpend));
   const [isSavingAdSpend, setIsSavingAdSpend] = useState(false);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [rowError, setRowError] = useState<string | null>(null);
 
   const isDraft = invoice.status === InvoiceStatus.DRAFT;
   const canMarkSent = invoice.status === InvoiceStatus.DRAFT;
   const canMarkPaid = invoice.status === InvoiceStatus.SENT;
+  const canDelete =
+    invoice.status === InvoiceStatus.DRAFT ||
+    invoice.status === InvoiceStatus.SENT;
 
   async function handleSaveAdSpend() {
     const value = Number(adSpendInput);
@@ -68,6 +73,19 @@ export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
     setAdSpendInput(String(invoice.adSpend));
     setRowError(null);
     setIsEditingAdSpend(false);
+  }
+
+  async function handleDelete() {
+    if (!confirm("Delete this invoice? This action cannot be undone.")) return;
+    setRowError(null);
+    setIsDeleting(true);
+    const result = await deleteInvoice(invoice.id);
+    setIsDeleting(false);
+    if (result.success) {
+      onUpdated();
+    } else {
+      setRowError(result.error ?? "Failed to delete");
+    }
   }
 
   return (
@@ -170,6 +188,21 @@ export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
             <span className="text-destructive text-xs">{rowError}</span>
           )}
         </div>
+      </TableCell>
+      <TableCell>
+        {canDelete && (
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            aria-label="Delete invoice"
+          >
+            {isDeleting ? "Deleting…" : <Trash2Icon className="size-4" />}
+          </Button>
+        )}
       </TableCell>
     </TableRow>
   );
