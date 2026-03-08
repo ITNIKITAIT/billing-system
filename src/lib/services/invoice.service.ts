@@ -3,6 +3,7 @@
 import { InvoiceStatus } from "@prisma/client";
 import { prisma } from "../../../prisma/db";
 import { calculateFee, getProrationRatio } from "@/lib/billing";
+import { createInvoiceCheckoutSession } from "@/lib/stripe-invoice";
 import {
   generateInvoiceFormSchema,
   type GenerateInvoiceFormValues,
@@ -104,9 +105,26 @@ export async function updateInvoiceStatus(id: string, status: InvoiceStatus) {
     };
   }
 
-  const updateData: { status: InvoiceStatus; paidAt?: Date } = { status };
+  const updateData: {
+    status: InvoiceStatus;
+    paidAt?: Date;
+    stripeCheckoutSessionId?: string;
+  } = { status };
   if (status === InvoiceStatus.PAID) {
     updateData.paidAt = new Date();
+  }
+
+  if (status === InvoiceStatus.SENT) {
+    const stripeResult = await createInvoiceCheckoutSession(
+      invoice.id,
+      invoice.clientId,
+      invoice.fee,
+      invoice.client.email,
+      `Invoice ${invoice.month}/${invoice.year}`
+    );
+    if (stripeResult) {
+      updateData.stripeCheckoutSessionId = stripeResult.sessionId;
+    }
   }
 
   try {
@@ -118,6 +136,36 @@ export async function updateInvoiceStatus(id: string, status: InvoiceStatus) {
   } catch (e) {
     console.error("updateInvoiceStatus", e);
     return { success: false, error: "Failed to update invoice" };
+  }
+}
+
+const DELETABLE_STATUSES: InvoiceStatus[] = [
+  InvoiceStatus.DRAFT,
+  InvoiceStatus.SENT,
+];
+
+export async function deleteInvoice(id: string) {
+  const invoice = await prisma.invoice.findUnique({
+    where: { id },
+  });
+  if (!invoice) {
+    return { success: false, error: "Invoice not found" };
+  }
+  if (!DELETABLE_STATUSES.includes(invoice.status)) {
+    return {
+      success: false,
+      error: "Only draft or sent invoices can be deleted",
+    };
+  }
+
+  try {
+    await prisma.invoice.delete({
+      where: { id },
+    });
+    return { success: true };
+  } catch (e) {
+    console.error("deleteInvoice", e);
+    return { success: false, error: "Failed to delete invoice" };
   }
 }
 

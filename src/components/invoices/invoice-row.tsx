@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   updateInvoiceAdSpend,
   updateInvoiceStatus,
+  deleteInvoice,
 } from "@/lib/services/invoice.service";
 import { Invoice, InvoiceStatus } from "@prisma/client";
 import {
@@ -15,7 +16,7 @@ import {
   formatInvoicePeriod,
   statusBadgeVariant,
 } from "@/lib/format";
-import { EditIcon } from "lucide-react";
+import { EditIcon, Loader2Icon, Trash2Icon } from "lucide-react";
 
 interface InvoiceRowProps {
   invoice: Invoice;
@@ -27,11 +28,16 @@ export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
   const [adSpendInput, setAdSpendInput] = useState(String(invoice.adSpend));
   const [isSavingAdSpend, setIsSavingAdSpend] = useState(false);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
+  const [isRedirectingToPay, setIsRedirectingToPay] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [rowError, setRowError] = useState<string | null>(null);
 
   const isDraft = invoice.status === InvoiceStatus.DRAFT;
   const canMarkSent = invoice.status === InvoiceStatus.DRAFT;
-  const canMarkPaid = invoice.status === InvoiceStatus.SENT;
+  const canPay = invoice.status === InvoiceStatus.SENT;
+  const canDelete =
+    invoice.status === InvoiceStatus.DRAFT ||
+    invoice.status === InvoiceStatus.SENT;
 
   async function handleSaveAdSpend() {
     const value = Number(adSpendInput);
@@ -64,10 +70,45 @@ export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
     }
   }
 
+  async function handlePay() {
+    setRowError(null);
+    setIsRedirectingToPay(true);
+    try {
+      const res = await fetch(`/api/invoices/${invoice.id}/checkout`);
+      const data = await res.json();
+      if (!res.ok) {
+        setRowError(data.error ?? "Failed to get payment link");
+        return;
+      }
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setRowError("Payment link not available");
+      }
+    } catch {
+      setRowError("Failed to get payment link");
+    } finally {
+      setIsRedirectingToPay(false);
+    }
+  }
+
   function handleCancelEdit() {
     setAdSpendInput(String(invoice.adSpend));
     setRowError(null);
     setIsEditingAdSpend(false);
+  }
+
+  async function handleDelete() {
+    if (!confirm("Delete this invoice? This action cannot be undone.")) return;
+    setRowError(null);
+    setIsDeleting(true);
+    const result = await deleteInvoice(invoice.id);
+    setIsDeleting(false);
+    if (result.success) {
+      onUpdated();
+    } else {
+      setRowError(result.error ?? "Failed to delete");
+    }
   }
 
   return (
@@ -151,18 +192,26 @@ export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
                 onClick={() => handleStatusChange(InvoiceStatus.SENT)}
                 disabled={isChangingStatus}
               >
-                {isChangingStatus ? "…" : "Mark as Sent"}
+                {isChangingStatus ? (
+                  <Loader2Icon className="size-4 animate-spin" />
+                ) : (
+                  "Mark as Sent"
+                )}
               </Button>
             )}
-            {canMarkPaid && (
+            {canPay && (
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => handleStatusChange(InvoiceStatus.PAID)}
-                disabled={isChangingStatus}
+                onClick={handlePay}
+                disabled={isRedirectingToPay}
               >
-                {isChangingStatus ? "…" : "Mark as Paid"}
+                {isRedirectingToPay ? (
+                  <Loader2Icon className="size-4 animate-spin" />
+                ) : (
+                  "Pay"
+                )}
               </Button>
             )}
           </div>
@@ -170,6 +219,21 @@ export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
             <span className="text-destructive text-xs">{rowError}</span>
           )}
         </div>
+      </TableCell>
+      <TableCell>
+        {canDelete && (
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            aria-label="Delete invoice"
+          >
+            {isDeleting ? "Deleting…" : <Trash2Icon className="size-4" />}
+          </Button>
+        )}
       </TableCell>
     </TableRow>
   );

@@ -4,6 +4,7 @@ import {
   getInvoice,
   updateInvoiceStatus,
   updateInvoiceAdSpend,
+  deleteInvoice,
 } from "@/lib/services/invoice.service";
 
 export async function GET(
@@ -61,6 +62,26 @@ export async function PATCH(
     console.error("PATCH /api/invoices/[id]", e);
     return NextResponse.json(
       { error: "Failed to update invoice" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  try {
+    const result = await deleteInvoice(id);
+    if (result.success) {
+      return new NextResponse(null, { status: 204 });
+    }
+    return NextResponse.json({ error: result.error }, { status: 400 });
+  } catch (e) {
+    console.error("DELETE /api/invoices/[id]", e);
+    return NextResponse.json(
+      { error: "Failed to delete invoice" },
       { status: 500 }
     );
   }
