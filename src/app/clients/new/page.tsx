@@ -3,6 +3,8 @@ import { createClient } from "@/lib/services/client.service";
 import { ClientForm } from "../../../components/clients/client-form";
 import { BackButton } from "@/components/shared/back-button";
 
+export const dynamic = "force-dynamic";
+
 export default async function NewClientPage() {
   const plans = await getPlans();
 
