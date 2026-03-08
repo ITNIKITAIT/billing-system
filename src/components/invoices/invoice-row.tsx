@@ -6,24 +6,38 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
-  updateInvoiceAdSpend,
-  updateInvoiceStatus,
-  deleteInvoice,
-} from "@/lib/services/invoice.service";
-import { Invoice, InvoiceStatus } from "@prisma/client";
-import {
   formatCurrency,
   formatInvoicePeriod,
   statusBadgeVariant,
 } from "@/lib/format";
 import { EditIcon, Loader2Icon, Trash2Icon } from "lucide-react";
+import type { ActionResult } from "@/lib/api";
+import { InvoiceStatus } from "@prisma/client";
 
-interface InvoiceRowProps {
-  invoice: Invoice;
-  onUpdated: () => void;
+export interface InvoiceForRow {
+  id: string;
+  month: number;
+  year: number;
+  adSpend: number;
+  fee: number;
+  status: InvoiceStatus;
 }
 
-export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
+interface InvoiceRowProps {
+  invoice: InvoiceForRow;
+  onUpdated: () => void;
+  onUpdateAdSpend: (id: string, adSpend: number) => Promise<ActionResult>;
+  onUpdateStatus: (id: string, status: InvoiceStatus) => Promise<ActionResult>;
+  onDelete: (id: string) => Promise<ActionResult>;
+}
+
+export function InvoiceRow({
+  invoice,
+  onUpdated,
+  onUpdateAdSpend,
+  onUpdateStatus,
+  onDelete,
+}: InvoiceRowProps) {
   const [isEditingAdSpend, setIsEditingAdSpend] = useState(false);
   const [adSpendInput, setAdSpendInput] = useState(String(invoice.adSpend));
   const [isSavingAdSpend, setIsSavingAdSpend] = useState(false);
@@ -47,7 +61,7 @@ export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
     }
     setRowError(null);
     setIsSavingAdSpend(true);
-    const result = await updateInvoiceAdSpend(invoice.id, value);
+    const result = await onUpdateAdSpend(invoice.id, value);
     setIsSavingAdSpend(false);
 
     if (result.success) {
@@ -61,7 +75,7 @@ export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
   async function handleStatusChange(newStatus: InvoiceStatus) {
     setRowError(null);
     setIsChangingStatus(true);
-    const result = await updateInvoiceStatus(invoice.id, newStatus);
+    const result = await onUpdateStatus(invoice.id, newStatus);
     setIsChangingStatus(false);
     if (result.success) {
       onUpdated();
@@ -102,7 +116,7 @@ export function InvoiceRow({ invoice, onUpdated }: InvoiceRowProps) {
     if (!confirm("Delete this invoice? This action cannot be undone.")) return;
     setRowError(null);
     setIsDeleting(true);
-    const result = await deleteInvoice(invoice.id);
+    const result = await onDelete(invoice.id);
     setIsDeleting(false);
     if (result.success) {
       onUpdated();

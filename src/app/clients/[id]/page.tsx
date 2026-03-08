@@ -1,6 +1,11 @@
 import { getPlans } from "@/lib/services/plan.service";
 import { updateClient, getClient } from "@/lib/services/client.service";
-import { getInvoicesByClient } from "@/lib/services/invoice.service";
+import {
+  getInvoicesByClient,
+  updateInvoiceAdSpend,
+  updateInvoiceStatus,
+  deleteInvoice,
+} from "@/lib/services/invoice.service";
 import { ClientForm } from "@/components/clients/client-form";
 import { BackButton } from "@/components/shared/back-button";
 import { notFound } from "next/navigation";
@@ -29,6 +34,9 @@ export default async function ClientPage({
           clientId={id}
           invoices={invoices}
           hasPlan={Boolean(client.planId)}
+          onUpdateAdSpend={updateInvoiceAdSpend}
+          onUpdateStatus={updateInvoiceStatus}
+          onDelete={deleteInvoice}
         />
         <ClientForm
           plans={plans}
