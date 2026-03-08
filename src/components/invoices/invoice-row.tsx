@@ -11,8 +11,13 @@ import {
   statusBadgeVariant,
 } from "@/lib/format";
 import { EditIcon, Loader2Icon, Trash2Icon } from "lucide-react";
-import { InvoiceStatus } from "@prisma/client";
 import type { ActionResult } from "@/lib/api";
+
+enum InvoiceStatus {
+  DRAFT = "DRAFT",
+  SENT = "SENT",
+  PAID = "PAID",
+}
 
 export interface InvoiceForRow {
   id: string;

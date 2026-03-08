@@ -34,7 +34,7 @@ import {
   type ClientFormDefaultValues,
   clientFormSchema,
 } from "@/lib/schemas/client";
-import { Plan } from "@prisma/client";
+import type { Plan } from "@prisma/client";
 
 interface ClientFormProps {
   plans: Plan[];

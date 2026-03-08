@@ -14,7 +14,12 @@ import { GenerateInvoiceForm } from "./generate-invoice-form";
 import { InvoicesTable } from "./invoices-table";
 import type { InvoiceForRow } from "./invoice-row";
 import type { ActionResult } from "@/lib/api";
-import type { InvoiceStatus } from "@prisma/client";
+
+enum InvoiceStatus {
+  DRAFT = "DRAFT",
+  SENT = "SENT",
+  PAID = "PAID",
+}
 
 interface InvoicesBlockProps {
   clientId: string;
