@@ -12,18 +12,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { GenerateInvoiceForm } from "./generate-invoice-form";
 import { InvoicesTable } from "./invoices-table";
-import type { Invoice } from "@prisma/client";
+import type { InvoiceForRow } from "./invoice-row";
+import type { ActionResult } from "@/lib/api";
+import type { InvoiceStatus } from "@prisma/client";
 
 interface InvoicesBlockProps {
   clientId: string;
-  invoices: Invoice[];
+  invoices: InvoiceForRow[];
   hasPlan: boolean;
+  onUpdateAdSpend: (id: string, adSpend: number) => Promise<ActionResult>;
+  onUpdateStatus: (id: string, status: InvoiceStatus) => Promise<ActionResult>;
+  onDelete: (id: string) => Promise<ActionResult>;
 }
 
 export function InvoicesBlock({
   clientId,
   invoices,
   hasPlan,
+  onUpdateAdSpend,
+  onUpdateStatus,
+  onDelete,
 }: InvoicesBlockProps) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
@@ -68,7 +76,12 @@ export function InvoicesBlock({
             No invoices yet for this client.
           </p>
         ) : (
-          <InvoicesTable invoices={invoices} />
+          <InvoicesTable
+            invoices={invoices}
+            onUpdateAdSpend={onUpdateAdSpend}
+            onUpdateStatus={onUpdateStatus}
+            onDelete={onDelete}
+          />
         )}
       </CardContent>
     </Card>

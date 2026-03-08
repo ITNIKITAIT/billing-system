@@ -9,13 +9,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { InvoiceRow } from "./invoice-row";
-import type { Invoice } from "@prisma/client";
+import type { InvoiceForRow } from "./invoice-row";
+import type { ActionResult } from "@/lib/api";
+import type { InvoiceStatus } from "@prisma/client";
 
 interface InvoicesTableProps {
-  invoices: Invoice[];
+  invoices: InvoiceForRow[];
+  onUpdateAdSpend: (id: string, adSpend: number) => Promise<ActionResult>;
+  onUpdateStatus: (id: string, status: InvoiceStatus) => Promise<ActionResult>;
+  onDelete: (id: string) => Promise<ActionResult>;
 }
 
-export function InvoicesTable({ invoices }: InvoicesTableProps) {
+export function InvoicesTable({
+  invoices,
+  onUpdateAdSpend,
+  onUpdateStatus,
+  onDelete,
+}: InvoicesTableProps) {
   const router = useRouter();
 
   function handleUpdated() {
@@ -35,7 +45,14 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
       </TableHeader>
       <TableBody>
         {invoices.map((inv) => (
-          <InvoiceRow key={inv.id} invoice={inv} onUpdated={handleUpdated} />
+          <InvoiceRow
+            key={inv.id}
+            invoice={inv}
+            onUpdated={handleUpdated}
+            onUpdateAdSpend={onUpdateAdSpend}
+            onUpdateStatus={onUpdateStatus}
+            onDelete={onDelete}
+          />
         ))}
       </TableBody>
     </Table>
