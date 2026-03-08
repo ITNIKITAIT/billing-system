@@ -47,6 +47,8 @@ model Invoice {
 
   status InvoiceStatus @default(DRAFT)
 
+  stripeCheckoutSessionId String?
+
   paidAt    DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

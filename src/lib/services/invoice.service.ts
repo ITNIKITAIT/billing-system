@@ -3,6 +3,7 @@
 import { InvoiceStatus } from "@prisma/client";
 import { prisma } from "../../../prisma/db";
 import { calculateFee, getProrationRatio } from "@/lib/billing";
+import { createInvoiceCheckoutSession } from "@/lib/stripe-invoice";
 import {
   generateInvoiceFormSchema,
   type GenerateInvoiceFormValues,
@@ -104,9 +105,26 @@ export async function updateInvoiceStatus(id: string, status: InvoiceStatus) {
     };
   }
 
-  const updateData: { status: InvoiceStatus; paidAt?: Date } = { status };
+  const updateData: {
+    status: InvoiceStatus;
+    paidAt?: Date;
+    stripeCheckoutSessionId?: string;
+  } = { status };
   if (status === InvoiceStatus.PAID) {
     updateData.paidAt = new Date();
+  }
+
+  if (status === InvoiceStatus.SENT) {
+    const stripeResult = await createInvoiceCheckoutSession(
+      invoice.id,
+      invoice.clientId,
+      invoice.fee,
+      invoice.client.email,
+      `Invoice ${invoice.month}/${invoice.year}`
+    );
+    if (stripeResult) {
+      updateData.stripeCheckoutSessionId = stripeResult.sessionId;
+    }
   }
 
   try {
